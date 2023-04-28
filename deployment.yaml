@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enc_dec_uem
+spec:
+  selector:
+    matchLabels:
+      run: enc_dec_uem
+  template:
+    metadata:
+      labels:
+        run: enc_dec_uem
+    spec:
+      containers:
+        - name: enc_dec_uem
+          image: jp2.icr.io/enc_dec_uem/enc_dec_uem:1
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: icr
