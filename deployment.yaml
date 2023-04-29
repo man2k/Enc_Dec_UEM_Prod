@@ -1,7 +1,7 @@
-apiVersion: apps/v1
+apiVersion:
 kind: Deployment
 metadata:
-  name: enc_dec_uem
+  name: enc-dec-uem
 spec:
   selector:
     matchLabels:
