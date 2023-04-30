@@ -184,7 +184,7 @@ app.post("/decrypt/:algo", (req, res) => {
       (err) => {
         if (err) {
           console.error("err", err);
-          res.json({ success: false, error: err });
+          res.status(400).json({ success: false, error: err });
         } else {
           console.log("File Decrypted Successfully");
 
