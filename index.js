@@ -184,7 +184,7 @@ app.post("/decrypt/:algo", (req, res) => {
       (err) => {
         if (err) {
           console.error("err", err);
-          res.status(400).json({ success: false, error: err });
+          res.status(401).json({ success: false, error: "Invalid Password" });
         } else {
           console.log("File Decrypted Successfully");
 
@@ -215,7 +215,7 @@ app.post("/decrypt/:algo", (req, res) => {
       }
     );
   } else {
-    res.status(400).json({ success: false });
+    res.status(404).json({ success: false, error: "File Not Uploaded" });
   }
 });
 
