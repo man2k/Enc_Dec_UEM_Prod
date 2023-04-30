@@ -215,7 +215,7 @@ app.post("/decrypt/:algo", (req, res) => {
       }
     );
   } else {
-    res.json({ success: false });
+    res.status(400).json({ success: false });
   }
 });
 
