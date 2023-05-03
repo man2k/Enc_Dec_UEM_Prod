@@ -20,23 +20,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/", express.static(path.resolve(__dirname, "public")));
-
+// console.log(path.resolve(__dirname));
 const makeStorage = () => {
-  if (!fs.existsSync("/tmp/uploads")) {
-    fs.mkdirSync("/tmp/uploads");
+  if (!fs.existsSync("./tmp")) {
+    fs.mkdirSync("./tmp");
   }
-  if (!fs.existsSync("/tmp/uploads/store")) {
-    fs.mkdirSync("/tmp/uploads/store");
+  if (!fs.existsSync("./tmp/uploads")) {
+    fs.mkdirSync("./tmp/uploads");
   }
-  if (!fs.existsSync("/tmp/uploads/store/steganograph")) {
-    fs.mkdirSync("/tmp/uploads/store/steganograph");
+  if (!fs.existsSync("./tmp/uploads/store")) {
+    fs.mkdirSync("./tmp/uploads/store");
+  }
+  if (!fs.existsSync("./tmp/uploads/store/steganograph")) {
+    fs.mkdirSync("./tmp/uploads/store/steganograph");
   }
 };
 makeStorage();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     makeStorage();
-    cb(null, "/tmp/uploads/store");
+    cb(null, "./tmp/uploads/store");
   },
   filename: (req, file, cb) => {
     const filename = `forenc.${file.mimetype.split("/")[1]}`;
@@ -47,7 +50,7 @@ const storage = multer.diskStorage({
 const storagedec = multer.diskStorage({
   destination: (req, file, cb) => {
     makeStorage();
-    cb(null, "/tmp/uploads/store");
+    cb(null, "./tmp/uploads/store");
   },
   filename: (req, file, cb) => {
     cb(null, file.originalname);
@@ -57,7 +60,7 @@ const storagedec = multer.diskStorage({
 const storage2 = multer.diskStorage({
   destination: function (req, file, cb) {
     makeStorage();
-    cb(null, "/tmp/uploads/store/steganograph");
+    cb(null, "./tmp/uploads/store/steganograph");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname + ".png");
@@ -66,7 +69,7 @@ const storage2 = multer.diskStorage({
 
 const storage3 = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "/tmp/uploads/store/steganograph");
+    cb(null, "./tmp/uploads/store/steganograph");
   },
   filename: function (req, file, cb) {
     cb(null, "steganographed.png");
@@ -106,8 +109,8 @@ app.post("/upload/steg", upload2.single("file"), (req, res) => {
   const pass = req.body.password;
 
   steganograph(
-    `/tmp/uploads/store/steganograph/${file.filename}`,
-    `/tmp/uploads/store/steganograph/steganographed.png`,
+    `./tmp/uploads/store/steganograph/${file.filename}`,
+    `./tmp/uploads/store/steganograph/steganographed.png`,
     secret,
     pass,
     (err) => {
@@ -119,18 +122,19 @@ app.post("/upload/steg", upload2.single("file"), (req, res) => {
 app.post("/unsteg", upload3.single("file"), (req, res) => {
   try {
     unsteganograph(
-      `/tmp/uploads/store/steganograph/steganographed.png`,
+      `./tmp/uploads/store/steganograph/steganographed.png`,
       req.body.password,
       (err, secret) => {
         if (err) {
           res.status(400).json({ error: "Wrong Password" });
         } else {
-          const Regex = /^[a-zA-Z0-9_.-]*$/gm;
-          if (Regex.exec(secret)[0]) {
-            res.status(200).json({ secret: secret });
-          } else {
-            res.status(400).json({ error: "Wrong Password" });
-          }
+          // console.log(secret);
+          // const Regex = /^[a-zA-Z0-9_.-]*$/gm;
+          // if (Regex.exec(secret)[0]) {
+          res.status(200).json({ secret: secret });
+          // } else {
+          // res.status(400).json({ error: "Wrong Password" });
+          // }
         }
       }
     );
@@ -141,7 +145,7 @@ app.post("/unsteg", upload3.single("file"), (req, res) => {
 });
 
 app.get("/execsteg", (req, res) => {
-  res.download("/tmp/uploads/store/steganograph/steganographed.png");
+  res.download("./tmp/uploads/store/steganograph/steganographed.png");
 });
 
 app.get("/encrypt/:algo", (req, res) => {
@@ -149,7 +153,7 @@ app.get("/encrypt/:algo", (req, res) => {
   if (fs.existsSync(originalFilePath) && originalFilePath) {
     encryptFile(
       originalFilePath,
-      `/tmp/uploads/store/${originalFileName}.enc`,
+      `./tmp/uploads/store/${originalFileName}.enc`,
       algo,
       (err, key) => {
         if (err) {
@@ -158,12 +162,12 @@ app.get("/encrypt/:algo", (req, res) => {
         } else if (key) {
           console.log("File Encrypted Successfully");
           const file = fs.readFileSync(
-            `/tmp/uploads/store/${originalFileName}.enc`
+            `./tmp/uploads/store/${originalFileName}.enc`
           );
           res
             .status(200)
             .set("x-key", key.toString("hex"))
-            .download(`/tmp/uploads/store/${originalFileName}.enc`); //.json({ key: key.toString("hex") });
+            .download(`./tmp/uploads/store/${originalFileName}.enc`); //.json({ key: key.toString("hex") });
         }
       }
     );
@@ -178,7 +182,7 @@ app.post("/decrypt/:algo", (req, res) => {
     // console.log(__dirname);
     decryptFile(
       originalFilePath,
-      `/tmp/uploads/store/${originalFileName.replace(".enc", "")}`,
+      `./tmp/uploads/store/${originalFileName.replace(".enc", "")}`,
       req.body.key,
       algo,
       (err) => {
@@ -189,13 +193,13 @@ app.post("/decrypt/:algo", (req, res) => {
           console.log("File Decrypted Successfully");
 
           const options = {
-            root: `/tmp/uploads/store/`,
+            root: `./tmp/uploads/store/`,
           };
-          fs.readdir("/tmp/uploads/store/", (err, files) => {
-            files.forEach((file) => {
-              console.log(file);
-            });
-          });
+          // fs.readdir("./tmp/uploads/store/", (err, files) => {
+          //   files.forEach((file) => {
+          //     console.log(file);
+          //   });
+          // });
           res.header("filename", originalFileName.replace(".enc", ""));
 
           res.sendFile(originalFileName.replace(".enc", ""), options, (e) => {
@@ -204,7 +208,7 @@ app.post("/decrypt/:algo", (req, res) => {
             } else {
               console.log("File Sent Successfully");
               fs.unlink(
-                `/tmp/uploads/store/${originalFileName.replace(".enc", "")}`,
+                `./tmp/uploads/store/${originalFileName.replace(".enc", "")}`,
                 (err) => {
                   if (err) throw err;
                 }

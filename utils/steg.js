@@ -27,9 +27,10 @@ const steganograph = (
   pass,
   callback
 ) => {
+  // console.log(inputFilePath);
   convertJpgToPng(inputFilePath, outputFilePath, (err, img) => {
     if (err) {
-      console.log(err);
+      console.log("lol error", err);
     } else {
       const steggyData = steggy.conceal(pass)(img, secret);
       fs.writeFileSync(outputFilePath, steggyData);
@@ -40,6 +41,7 @@ const steganograph = (
 
 const unsteganograph = (steganographedFilePath, pass, callback) => {
   const steganographedImageData = fs.readFileSync(steganographedFilePath);
+  console.log(steganographedFilePath);
 
   try {
     const hiddenFileData = steggy.reveal(pass)(steganographedImageData);
